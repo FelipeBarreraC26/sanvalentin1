@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿Quieres ser mi San Valentín?</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    overflow:hidden;
+    color:white;
+}
+
+canvas{
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:-1;
+}
+
+.card{
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(20px);
+    padding:30px;
+    border-radius:20px;
+    width:95%;
+    max-width:500px;
+    text-align:center;
+    margin:auto;
+    margin-top:8vh;
+    animation:fadeIn 1s ease;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+button{
+    padding:12px 20px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:16px;
+    margin:10px;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.1);
+}
+
+.yes{
+    background:#ff4d6d;
+    color:white;
+}
+
+.no{
+    background:#444;
+    color:white;
+}
+
+.hidden{
+    display:none;
+}
+
+.options{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    margin-top:20px;
+}
+
+.option-card{
+    background: rgba(255,255,255,0.15);
+    border-radius:15px;
+    overflow:hidden;
+    cursor:pointer;
+    transition:0.4s;
+    border:2px solid transparent;
+    position:relative;
+}
+
+.option-card:hover{
+    transform:scale(1.05);
+}
+
+.option-card.selected{
+    border:2px solid #fff;
+    box-shadow:0 0 25px rgba(255,255,255,0.8);
+    transform:scale(1.08);
+}
+
+.option-card img{
+    width:100%;
+    height:150px;
+    object-fit:cover;
+}
+
+.option-card h3{
+    padding:10px;
+}
+
+.check{
+    position:absolute;
+    top:10px;
+    right:10px;
+    background:#ff4d6d;
+    width:25px;
+    height:25px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    transform:scale(0);
+    transition:0.3s;
+}
+
+.option-card.selected .check{
+    transform:scale(1);
+}
+
+textarea{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:none;
+    margin-top:10px;
+}
+
+.submit-btn{
+    margin-top:20px;
+    width:100%;
+}
+</style>
+</head>
+<body>
+
+<!-- Fondo galaxia -->
+<canvas id="galaxy"></canvas>
+
+<div class="card" id="step1">
+    <h1>¿Quieres ser mi San Valentín? 💖</h1>
+    <button class="yes" onclick="showOptions()">Sí 💘</button>
+    <button class="no" onclick="alert('No acepto un no 😅')">No</button>
+</div>
+
+<div class="card hidden" id="step2">
+    <h2>Elige nuestra cita 💕</h2>
+
+    <form action="https://formspree.io/f/mykdeqey" method="POST">
+        <input type="hidden" name="_subject" value="💘 Respondió tu San Valentín">
+        <input type="hidden" name="tipo_cita" id="tipoCita">
+
+        <div class="options">
+
+            <div class="option-card" onclick="selectOption(event,'Jugar It Takes Two')">
+                <div class="check">✔</div>
+                <img src="https://upload.wikimedia.org/wikipedia/en/9/9c/It_Takes_Two_cover_art.jpg">
+                <h3>Jugar It Takes Two 🎮</h3>
+            </div>
+
+            <div class="option-card" onclick="selectOption(event,'Ver una película')">
+                <div class="check">✔</div>
+                <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba">
+                <h3>Ver una película 🍿</h3>
+            </div>
+
+            <div class="option-card" onclick="selectOption(event,'Otro')">
+                <div class="check">✔</div>
+                <h3>Otro plan ✨</h3>
+            </div>
+
+        </div>
+
+        <textarea name="otro_plan" id="otroPlan" class="hidden" placeholder="Escribe qué quieres hacer..."></textarea>
+
+        <button type="submit" class="yes submit-btn">Enviar respuesta 💌</button>
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+// GALAXIA 3D
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight,0.1,1000);
+const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('galaxy')});
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+const starsGeometry = new THREE.BufferGeometry();
+const starVertices = [];
+
+for(let i=0;i<10000;i++){
+    const x=(Math.random()-0.5)*2000;
+    const y=(Math.random()-0.5)*2000;
+    const z=(Math.random()-0.5)*2000;
+    starVertices.push(x,y,z);
+}
+
+starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices,3));
+const starsMaterial = new THREE.PointsMaterial({color:0xffffff});
+const starField = new THREE.Points(starsGeometry,starsMaterial);
+scene.add(starField);
+
+camera.position.z = 5;
+
+function animate(){
+    requestAnimationFrame(animate);
+    starField.rotation.x += 0.0005;
+    starField.rotation.y += 0.0005;
+    renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+});
+
+// FORM INTERACCIÓN
+function showOptions(){
+    document.getElementById("step1").classList.add("hidden");
+    document.getElementById("step2").classList.remove("hidden");
+}
+
+function selectOption(event, option){
+
+    document.getElementById("tipoCita").value = option;
+
+    const cards = document.querySelectorAll(".option-card");
+    cards.forEach(card => card.classList.remove("selected"));
+
+    event.currentTarget.classList.add("selected");
+
+    if(option === "Otro"){
+        document.getElementById("otroPlan").classList.remove("hidden");
+    } else {
+        document.getElementById("otroPlan").classList.add("hidden");
+    }
+}
+</script>
+
+</body>
+</html>
